@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Search Engine</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        input {
+            width: 300px;
+            padding: 10px;
+            margin: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        #history, #favorites {
+            margin-top: 20px;
+            text-align: left;
+            display: inline-block;
+        }
+        li {
+            cursor: pointer;
+            list-style: none;
+            padding: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .remove {
+            cursor: pointer;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Simple Search Engine</h2>
+    <input type="text" id="search" placeholder="Type a URL or search query...">
+    <button onclick="searchWeb()">Search</button>
+    <button onclick="addFavorite()">Add to Favorites</button>
+    
+    <h3>Search History</h3>
+    <ul id="history"></ul>
+    
+    <h3>Favorites</h3>
+    <ul id="favorites"></ul>
+
+    <script>
+        function searchWeb() {
+            let query = document.getElementById('search').value.trim();
+            if (!query) return;
+            
+            saveToHistory(query);
+            
+            if (query.includes('.') && !query.includes(' ')) {
+                window.location.href = 'http://' + query;
+            } else {
+                window.location.href = 'https://www.google.com/search?q=' + encodeURIComponent(query);
+            }
+        }
+        
+        function saveToHistory(query) {
+            let history = JSON.parse(localStorage.getItem('searchHistory')) || [];
+            if (!history.includes(query)) {
+                history.push(query);
+                localStorage.setItem('searchHistory', JSON.stringify(history));
+            }
+            loadHistory();
+        }
+        
+        function addFavorite() {
+            let query = document.getElementById('search').value.trim();
+            if (!query) return;
+            
+            let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+            if (!favorites.includes(query)) {
+                favorites.push(query);
+                localStorage.setItem('favorites', JSON.stringify(favorites));
+            }
+            loadFavorites();
+        }
+        
+        function loadHistory() {
+            let history = JSON.parse(localStorage.getItem('searchHistory')) || [];
+            let historyList = document.getElementById('history');
+            historyList.innerHTML = '';
+            history.forEach(query => {
+                let li = document.createElement('li');
+                li.innerHTML = `${query} <span class='remove' onclick='removeFromHistory("${query}")'>&#10060;</span>`;
+                li.onclick = () => document.getElementById('search').value = query;
+                historyList.appendChild(li);
+            });
+        }
+        
+        function loadFavorites() {
+            let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+            let favoritesList = document.getElementById('favorites');
+            favoritesList.innerHTML = '';
+            favorites.forEach(query => {
+                let li = document.createElement('li');
+                li.innerHTML = `${query} <span class='remove' onclick='removeFromFavorites("${query}")'>&#10060;</span>`;
+                li.onclick = () => document.getElementById('search').value = query;
+                favoritesList.appendChild(li);
+            });
+        }
+        
+        function removeFromHistory(query) {
+            let history = JSON.parse(localStorage.getItem('searchHistory')) || [];
+            history = history.filter(item => item !== query);
+            localStorage.setItem('searchHistory', JSON.stringify(history));
+            loadHistory();
+        }
+        
+        function removeFromFavorites(query) {
+            let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+            favorites = favorites.filter(item => item !== query);
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+            loadFavorites();
+        }
+        
+        window.onload = function() {
+            loadHistory();
+            loadFavorites();
+        }
+    </script>
+</body>
+</html>

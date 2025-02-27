@@ -20,7 +20,7 @@
             margin: 10px;
             cursor: pointer;
         }
-        #history, #favorites {
+        #favorites {
             margin-top: 20px;
             text-align: left;
             display: inline-block;
@@ -45,9 +45,6 @@
     <button onclick="searchWeb()">Search</button>
     <button onclick="addFavorite()">Add to Favorites</button>
     
-    <h3>Search History</h3>
-    <ul id="history"></ul>
-    
     <h3>Favorites</h3>
     <ul id="favorites"></ul>
 
@@ -56,22 +53,12 @@
             let query = document.getElementById('search').value.trim();
             if (!query) return;
             
-            saveToHistory(query);
-            
+            // Redirect to URL or perform Google search
             if (query.includes('.') && !query.includes(' ')) {
                 window.location.href = 'http://' + query;
             } else {
                 window.location.href = 'https://www.google.com/search?q=' + encodeURIComponent(query);
             }
-        }
-        
-        function saveToHistory(query) {
-            let history = JSON.parse(localStorage.getItem('searchHistory')) || [];
-            if (!history.includes(query)) {
-                history.push(query);
-                localStorage.setItem('searchHistory', JSON.stringify(history));
-            }
-            loadHistory();
         }
         
         function addFavorite() {
@@ -86,18 +73,6 @@
             loadFavorites();
         }
         
-        function loadHistory() {
-            let history = JSON.parse(localStorage.getItem('searchHistory')) || [];
-            let historyList = document.getElementById('history');
-            historyList.innerHTML = '';
-            history.forEach(query => {
-                let li = document.createElement('li');
-                li.innerHTML = `${query} <span class='remove' onclick='removeFromHistory("${query}")'>&#10060;</span>`;
-                li.onclick = () => document.getElementById('search').value = query;
-                historyList.appendChild(li);
-            });
-        }
-        
         function loadFavorites() {
             let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
             let favoritesList = document.getElementById('favorites');
@@ -110,13 +85,6 @@
             });
         }
         
-        function removeFromHistory(query) {
-            let history = JSON.parse(localStorage.getItem('searchHistory')) || [];
-            history = history.filter(item => item !== query);
-            localStorage.setItem('searchHistory', JSON.stringify(history));
-            loadHistory();
-        }
-        
         function removeFromFavorites(query) {
             let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
             favorites = favorites.filter(item => item !== query);
@@ -125,7 +93,6 @@
         }
         
         window.onload = function() {
-            loadHistory();
             loadFavorites();
         }
     </script>
